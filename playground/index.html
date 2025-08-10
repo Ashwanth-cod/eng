@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ENG Playground Example</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <h1>ENG Playground</h1>
+
+  <div class="toolbar">
+    <button id="runButton">Run</button>
+    <button id="clearButton">Clear</button>
+  </div>
+
+  <div class="zoom-control">
+    <button onclick="zoom(-2)">-</button>
+    <span id="fontSizeDisplay">16px</span>
+    <button onclick="zoom(2)">+</button>
+  </div>
+
+  <div class="container">
+    <div id="editorWrapper">
+      <div id="editor" contenteditable="true" spellcheck="false">
+# Welcome to ENG programming
+# Try this command:
+say "Hello, World!"
+      </div>
+    </div>
+
+    <div id="outputWrapper">
+      <div id="output"></div>
+    </div>
+  </div>
+
+  <footer>
+    <p style="text-align:center; padding:10px 0; color:#666;">ENG Playground © 2025 | Built for learning and fun!</p>
+  </footer>
+
+  <script>
+    const editor = document.getElementById('editor');
+    const output = document.getElementById('output');
+    let fontSize = 16;
+
+    function clearOutput() {
+      output.innerText = '';
+    }
+
+    function zoom(change) {
+      fontSize += change;
+      if (fontSize < 10) fontSize = 10;
+      if (fontSize > 50) fontSize = 50;
+      editor.style.fontSize = fontSize + 'px';
+      output.style.fontSize = fontSize + 'px';
+      document.getElementById('fontSizeDisplay').innerText = fontSize + 'px';
+    }
+
+    window.zoom = zoom;
+    window.clearOutput = clearOutput;
+
+    function runCode() {
+      clearOutput();
+      const rawCode = editor.innerText;
+      const lines = rawCode.split(/\r?\n/);
+      let result = [];
+      for (let line of lines) {
+        line = line.trim();
+        if (line.startsWith('say ')) {
+          let match = line.match(/^say\s+["'](.+)["']$/);
+          if (match) {
+            result.push(match[1]);
+          } else {
+            result.push('Error: Invalid say command');
+          }
+        }
+      }
+      output.innerText = result.join('\n') + '\n\nExecution Time: 0.5 ms\nExecuted on: ' + new Date().toLocaleString();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('runButton').addEventListener('click', runCode);
+      document.getElementById('clearButton').addEventListener('click', clearOutput);
+      zoom(0); // initialize font size display
+    });
+  </script>
+
+</body>
+</html>

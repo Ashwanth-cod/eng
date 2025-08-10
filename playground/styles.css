@@ -1,0 +1,106 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #121212;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+h1 {
+    text-align: center;
+    margin: 10px 0;
+    color: #ffffff;
+}
+
+.toolbar {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 10px 0;
+    align-items: center;
+}
+
+button {
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    background-color: #333;
+    color: #ffffff;
+    border: 1px solid #555;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #444;
+}
+
+.zoom-control {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0;
+    padding: 5px 0;
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 5px;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.zoom-control button {
+    padding: 5px 10px;
+    font-size: 14px;
+    cursor: pointer;
+    background-color: #333;
+    color: #ffffff;
+    border: 1px solid #555;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.zoom-control button:hover {
+    background-color: #444;
+}
+
+.zoom-control span {
+    font-size: 14px;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.container {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Two equal columns for editor and output */
+    gap: 10px;
+    padding: 10px;
+    flex: 1;
+}
+
+#editorWrapper, #outputWrapper {
+    border: 1px solid #333;
+    background-color: #1e1e1e;
+    color: #d4d4d4;
+    overflow: hidden;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#editor, #output {
+    padding: 15px;
+    font-family: monospace;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    background-color: #1e1e1e;
+    color: #d4d4d4;
+    overflow-y: auto;
+    font-size: 16px;
+    line-height: 1.5;
+    height: 100%; /* Ensure it takes full height */
+    border-radius: 5px;
+}
