@@ -76,7 +76,7 @@ say "Hello, World!"
           }
         }
       }
-      output.innerText = result.join('\n') + '\n\nExecution Time: 0.5 ms\nExecuted on: ' + new Date().toLocaleString();
+      output.innerText = result.join('\n');
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -85,6 +85,8 @@ say "Hello, World!"
       zoom(0); // initialize font size display
     });
   </script>
+
+<script src="interpreter.js"></script>
 
 </body>
 </html>
