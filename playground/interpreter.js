@@ -1,26 +1,15 @@
-// --- INTERPRETER.JS ---
-
-// Globals
-window.variables = {};
-window.constants = {};
-window.functions = {};
-window.classes = {};
-
-// Environment stack for scopes and blocks (for nested blocks, loops, functions)
 class Environment {
   constructor(parent = null) {
     this.vars = {};
     this.consts = {};
     this.parent = parent;
   }
-
   get(name) {
     if (name in this.vars) return this.vars[name];
     if (name in this.consts) return this.consts[name];
     if (this.parent) return this.parent.get(name);
     throw new Error(`Variable "${name}" not found`);
   }
-
   set(name, value) {
     if (name in this.vars) {
       this.vars[name] = value;
@@ -30,329 +19,265 @@ class Environment {
       throw new Error(`Variable "${name}" not declared`);
     }
   }
-
   declareVar(name, value) {
     this.vars[name] = value;
   }
-
   declareConst(name, value) {
     this.consts[name] = value;
   }
-
   isDeclared(name) {
     return (name in this.vars) || (name in this.consts);
   }
 }
 
-// Runtime context
 class Runtime {
   constructor() {
     this.globalEnv = new Environment();
-    this.currentEnv = this.globalEnv;
     this.functions = {};
-    this.classes = {};
+    this.output = [];
   }
-
   reset() {
     this.globalEnv = new Environment();
-    this.currentEnv = this.globalEnv;
     this.functions = {};
-    this.classes = {};
-  }
-
-  declareVariable(name, value, isConst) {
-    if (this.currentEnv.isDeclared(name))
-      throw new Error(`Variable "${name}" already declared in this scope`);
-    if (isConst) this.currentEnv.declareConst(name, value);
-    else this.currentEnv.declareVar(name, value);
-  }
-
-  assignVariable(name, value) {
-    this.currentEnv.set(name, value);
-  }
-
-  getVariable(name) {
-    return this.currentEnv.get(name);
+    this.output = [];
   }
 }
 
 const runtime = new Runtime();
 
-// === Helpers ===
-
-// Parse a value string into JS type
-function parseValue(valStr) {
+function parseValue(valStr, env) {
   valStr = valStr.trim();
-  if (valStr.match(/^".*"$/) || valStr.match(/^'.*'$/)) {
-    return valStr.slice(1, -1); // string
+
+  // String literal "text" or 'text'
+  if (/^".*"$/.test(valStr) || /^'.*'$/.test(valStr)) {
+    return valStr.slice(1, -1);
   }
+  // Number literal
   if (!isNaN(Number(valStr))) {
     return Number(valStr);
   }
+  // Boolean literal
   if (valStr === 'true') return true;
   if (valStr === 'false') return false;
+  // List literal (basic, e.g. ['a', 'b', 'c'])
   if (valStr.startsWith('[') && valStr.endsWith(']')) {
     try {
+      // replace single quotes to double for JSON parse
       return JSON.parse(valStr.replace(/'/g, '"'));
     } catch {
       throw new Error('Invalid list syntax');
     }
   }
-  if (valStr.startsWith('{') && valStr.endsWith('}')) {
-    try {
-      return JSON.parse(valStr.replace(/'/g, '"'));
-    } catch {
-      throw new Error('Invalid map syntax');
+
+  // Variable or variable with indexing e.g. fruits[0], name[1]
+  let indexMatch = valStr.match(/^(\w+)(\[(.+)\])?$/);
+  if (indexMatch) {
+    let varName = indexMatch[1];
+    let indexExpr = indexMatch[3];
+    let val = env.get(varName);
+    if (indexExpr !== undefined) {
+      let idx = parseValue(indexExpr, env);
+      if (val && (typeof val === 'string' || Array.isArray(val))) {
+        if (idx < 0 || idx >= val.length) throw new Error('Index out of bounds');
+        return val[idx];
+      } else {
+        throw new Error(`Cannot index into variable "${varName}"`);
+      }
+    } else {
+      return val;
     }
   }
-  // Could be variable
-  return runtime.getVariable(valStr);
+
+  // Function call e.g. getFruit(2)
+  let funcCallMatch = valStr.match(/^(\w+)\((.*)\)$/);
+  if (funcCallMatch) {
+    let funcName = funcCallMatch[1];
+    let argStr = funcCallMatch[2];
+    if (!(funcName in runtime.functions)) {
+      throw new Error(`Function "${funcName}" not found`);
+    }
+    let args = [];
+    if (argStr.trim() !== '') {
+      // Support comma separated arguments with trimming
+      args = argStr.split(',').map(a => parseValue(a.trim(), env));
+    }
+    return callFunction(funcName, args, env);
+  }
+
+  // Variable only
+  return env.get(valStr);
 }
 
-// Evaluate expressions with indexing support
-function evalExpression(expr, env = runtime.currentEnv) {
+function evalExpression(expr, env) {
   expr = expr.trim();
 
-  // Replace variables with their values, supporting indexing like var[0], var[1]
-  let safeExpr = expr.replace(/[^\w\s\[\]\(\)\.\,\+\-\*\/\%\>\<\=\!\&\|\^\~\'\"\:\?\{\}\d\.]+/g, (m) => m); // sanitize but allow necessary chars
-
-  // Extract variable/index patterns and replace with literal values recursively
-  const varIndexRegex = /([a-zA-Z_]\w*(?:\[\d+\])*)/g;
-
-  safeExpr = safeExpr.replace(varIndexRegex, (match) => {
-    try {
-      // Split e.g. name[0][1] -> ['name', '0', '1']
-      let parts = match.split(/[\[\]]/).filter(p => p !== '');
-      let val = env.get(parts[0]);
-      for (let i = 1; i < parts.length; i++) {
-        let index = Number(parts[i]);
-        if (val == null) {
-          throw new Error(`Cannot index into null or undefined`);
-        }
-        if (typeof val === 'string') {
-          if (index < 0 || index >= val.length) {
-            throw new Error(`Index ${index} out of range for string`);
-          }
-          val = val.charAt(index);
-        } else if (Array.isArray(val) || typeof val === 'object') {
-          if (!(index in val)) {
-            throw new Error(`Index ${index} out of range`);
-          }
-          val = val[index];
-        } else {
-          throw new Error(`Cannot index into type ${typeof val}`);
-        }
+  // Support multiplication * operator (only single '*' in expression)
+  if (expr.includes('*')) {
+    let parts = expr.split('*').map(p => p.trim());
+    if (parts.length === 2) {
+      let left = parseValue(parts[0], env);
+      let right = parseValue(parts[1], env);
+      if (typeof left === 'number' && typeof right === 'number') {
+        return left * right;
       }
-      // Return string literals quoted
-      if (typeof val === 'string') return JSON.stringify(val);
-      return val;
-    } catch (e) {
-      throw new Error(`Variable or index error: ${match} - ${e.message}`);
+      throw new Error('Invalid operands for multiplication');
     }
-  });
-
-  // Evaluate safely with Function constructor
-  try {
-    // eslint-disable-next-line no-new-func
-    return Function('"use strict";return (' + safeExpr + ')')();
-  } catch (e) {
-    throw new Error(`Expression evaluation failed: ${expr}`);
-  }
-}
-
-// === Main interpreter function
-
-async function interpret(lines) {
-  runtime.reset();
-
-  function indentLevel(line) {
-    let match = line.match(/^(\s*)/);
-    return match ? match[1].length : 0;
   }
 
-  return interpretBlock(lines, 0, lines.length, runtime.globalEnv);
+  return parseValue(expr, env);
 }
 
-function interpretBlock(lines, start, end, env) {
-  let output = [];
-  let i = start;
+function callFunction(name, args, callerEnv) {
+  const func = runtime.functions[name];
+  if (args.length !== func.params.length) {
+    throw new Error(`Function "${name}" expects ${func.params.length} arguments but got ${args.length}`);
+  }
+  const funcEnv = new Environment(runtime.globalEnv);
+  func.params.forEach((p, i) => funcEnv.declareVar(p, args[i]));
 
-  while (i < end) {
-    let line = lines[i];
+  for (let line of func.body) {
     line = line.trim();
+    if (line.startsWith('return ')) {
+      let retExpr = line.slice(7);
+      return evalExpression(retExpr, funcEnv);
+    } else if (line.startsWith('say ')) {
+      let toSay = line.slice(4);
+      let val = evalExpression(toSay, funcEnv);
+      runtime.output.push(String(val));
+    } else {
+      // Could extend with more statements here (assign, repeat etc.)
+      // For now only support say and return inside functions
+    }
+  }
+  return null;
+}
+
+function interpretBlock(lines, env) {
+  let output = [];
+  runtime.output = output;
+  let i = 0;
+
+  while (i < lines.length) {
+    let line = lines[i].trim();
     if (line === '' || line.startsWith('#')) {
       i++;
       continue;
     }
 
-    // let var = expr  (mutable)
+    // Variable declaration: let var = expr
     let letMatch = line.match(/^let\s+(\w+)\s*=\s*(.+)$/);
     if (letMatch) {
       const [, varName, expr] = letMatch;
+      if (env.isDeclared(varName)) throw new Error(`Variable "${varName}" already declared`);
       const val = evalExpression(expr, env);
-      if (env.isDeclared(varName))
-        throw new Error(`Variable "${varName}" already declared`);
       env.declareVar(varName, val);
       i++;
       continue;
     }
 
-    // set var = expr  (const)
+    // Constant declaration: set var = expr
     let setMatch = line.match(/^set\s+(\w+)\s*=\s*(.+)$/);
     if (setMatch) {
       const [, varName, expr] = setMatch;
+      if (env.isDeclared(varName)) throw new Error(`Variable "${varName}" already declared`);
       const val = evalExpression(expr, env);
-      if (env.isDeclared(varName))
-        throw new Error(`Variable "${varName}" already declared`);
       env.declareConst(varName, val);
       i++;
       continue;
     }
 
-    // Assignment: var = expr (must already exist)
+    // Variable assignment: var = expr
     let assignMatch = line.match(/^(\w+)\s*=\s*(.+)$/);
     if (assignMatch) {
       const [, varName, expr] = assignMatch;
-      if (!env.isDeclared(varName))
-        throw new Error(`Variable "${varName}" not declared`);
+      if (!env.isDeclared(varName)) throw new Error(`Variable "${varName}" not declared`);
       const val = evalExpression(expr, env);
       env.set(varName, val);
       i++;
       continue;
     }
 
-    // say "text" or say var/expression
-    let sayMatch = line.match(/^say\s+(.+)$/);
-    if (sayMatch) {
-      let arg = sayMatch[1];
-      if (/^["'].*["']$/.test(arg)) {
-        output.push(arg.slice(1, -1));
-      } else {
-        try {
-          let val = evalExpression(arg, env);
-          output.push(String(val));
-        } catch (e) {
-          output.push('Error in say: ' + e.message);
-        }
-      }
+    // say command
+    if (line.startsWith('say ')) {
+      const toSay = line.slice(4);
+      const val = evalExpression(toSay, env);
+      output.push(String(val));
       i++;
       continue;
     }
 
-    // if condition:
-    let ifMatch = line.match(/^if\s+(.+):$/);
-    if (ifMatch) {
-      const condExpr = ifMatch[1];
-      const condResult = evalExpression(condExpr, env);
-      let blockStart = i + 1;
-      let blockEnd = blockStart;
-      while (blockEnd < lines.length && lines[blockEnd].startsWith('    ')) blockEnd++;
-      if (condResult) {
-        const blockOutput = interpretBlock(lines, blockStart, blockEnd, new Environment(env));
-        output.push(...blockOutput);
-      }
-      i = blockEnd;
-      continue;
-    }
-
-    // else:
-    let elseMatch = line.match(/^else:$/);
-    if (elseMatch) {
-      let blockStart = i + 1;
-      let blockEnd = blockStart;
-      while (blockEnd < lines.length && lines[blockEnd].startsWith('    ')) blockEnd++;
-      const blockOutput = interpretBlock(lines, blockStart, blockEnd, new Environment(env));
-      output.push(...blockOutput);
-      i = blockEnd;
-      continue;
-    }
-
-    // repeat n:
+    // repeat loop: repeat count:
     let repeatMatch = line.match(/^repeat\s+(\d+):$/);
     if (repeatMatch) {
-      const count = parseInt(repeatMatch[1], 10);
-      let blockStart = i + 1;
-      let blockEnd = blockStart;
-      while (blockEnd < lines.length && lines[blockEnd].startsWith('    ')) blockEnd++;
-      for (let c = 0; c < count; c++) {
-        const blockOutput = interpretBlock(lines, blockStart, blockEnd, new Environment(env));
-        output.push(...blockOutput);
+      const count = Number(repeatMatch[1]);
+      // Gather block lines indented by 4 spaces
+      const blockLines = [];
+      i++;
+      while (i < lines.length && (lines[i].startsWith('    ') || lines[i].trim() === '')) {
+        if (lines[i].trim() !== '') blockLines.push(lines[i].slice(4));
+        i++;
       }
-      i = blockEnd;
+      for (let r = 0; r < count; r++) {
+        interpretBlock(blockLines, env);
+      }
       continue;
     }
 
-    // while cond:
-    let whileMatch = line.match(/^while\s+(.+):$/);
-    if (whileMatch) {
-      const condExpr = whileMatch[1];
-      let blockStart = i + 1;
-      let blockEnd = blockStart;
-      while (blockEnd < lines.length && lines[blockEnd].startsWith('    ')) blockEnd++;
-      while (evalExpression(condExpr, env)) {
-        const blockOutput = interpretBlock(lines, blockStart, blockEnd, new Environment(env));
-        output.push(...blockOutput);
-      }
-      i = blockEnd;
-      continue;
-    }
-
-    // function funcName(params):
-    let funcMatch = line.match(/^function\s+(\w+)\s*\(([^)]*)\):$/);
+    // function declaration: function name(params):
+    let funcMatch = line.match(/^function\s+(\w+)\(([\w\s,]*)\):$/);
     if (funcMatch) {
-      const [, funcName, paramsStr] = funcMatch;
-      let params = paramsStr.trim() ? paramsStr.split(',').map(s => s.trim()) : [];
-      // Find function body
-      let blockStart = i + 1;
-      let blockEnd = blockStart;
-      while (blockEnd < lines.length && lines[blockEnd].startsWith('    ')) blockEnd++;
-      runtime.functions[funcName] = {
-        params,
-        bodyStart: blockStart,
-        bodyEnd: blockEnd,
-        bodyLines: lines.slice(blockStart, blockEnd)
-      };
-      i = blockEnd;
+      const [, fname, paramsStr] = funcMatch;
+      const params = paramsStr.split(',').map(s => s.trim()).filter(Boolean);
+      // Gather function body indented lines
+      const bodyLines = [];
+      i++;
+      while (i < lines.length && (lines[i].startsWith('    ') || lines[i].trim() === '')) {
+        if (lines[i].trim() !== '') bodyLines.push(lines[i].slice(4));
+        i++;
+      }
+      runtime.functions[fname] = { params, body: bodyLines };
       continue;
     }
 
-    // return expr
-    let returnMatch = line.match(/^return\s+(.+)$/);
-    if (returnMatch) {
-      let val = evalExpression(returnMatch[1], env);
-      throw { type: 'return', value: val };
-    }
-
-    // call functionName(args)
-    let callMatch = line.match(/^(\w+)\((.*)\)$/);
-    if (callMatch) {
-      let [, funcName, argsStr] = callMatch;
-      if (!(funcName in runtime.functions))
-        throw new Error(`Function "${funcName}" not found`);
-      let args = argsStr.trim() ? argsStr.split(',').map(a => evalExpression(a.trim(), env)) : [];
-      let func = runtime.functions[funcName];
-      if (args.length !== func.params.length)
-        throw new Error(`Function "${funcName}" expects ${func.params.length} arguments`);
-      let funcEnv = new Environment(runtime.globalEnv);
-      for (let j = 0; j < args.length; j++) {
-        funcEnv.declareVar(func.params[j], args[j]);
-      }
-      try {
-        return interpretBlock(func.bodyLines, 0, func.bodyLines.length, funcEnv).output;
-      } catch (e) {
-        if (e.type === 'return') return e.value;
-        else throw e;
-      }
-    }
-
-    // TODO: Add class, try/catch support here (if needed)
-
-    // If no known command
-    throw new Error(`Unknown or unsupported statement: ${line}`);
+    throw new Error(`Unknown or invalid syntax: "${line}"`);
   }
 
   return output;
 }
 
-// Export interpreter
-window.interpret = interpret;
+function runCode(code) {
+  runtime.reset();
+  const lines = code.split('\n');
+  const env = runtime.globalEnv;
+
+  try {
+    const startTime = performance.now();
+
+    const outputLines = interpretBlock(lines, env);
+
+    const endTime = performance.now();
+    const execTimeMs = (endTime - startTime).toFixed(2);
+
+    const executedAt = new Date().toLocaleString();
+
+    outputLines.push('');
+    outputLines.push(`Execution Time: ${execTimeMs} ms`);
+    outputLines.push(`Executed on: ${executedAt}`);
+
+    return outputLines.join('\n');
+  } catch (e) {
+    return `Error: ${e.message}`;
+  }
+}
+
+
+// Hook to HTML buttons
+document.getElementById('runButton').addEventListener('click', () => {
+  const code = document.getElementById('editor').innerText;
+  const result = runCode(code);
+  document.getElementById('output').innerText = result;
+});
+
+document.getElementById('clearButton').addEventListener('click', () => {
+  document.getElementById('output').innerText = '';
+});
