@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About - ENG Playground</title>
+  <link rel="stylesheet" href="css/theme.css">
+  <style>
+    /* Carousel container */
+    .carousel {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      height: 400px;
+    }
+
+    /* Inner wrapper that scrolls */
+    .carousel-inner {
+      display: flex;
+      width: 300%;
+      height: 100%;
+    }
+
+
+    /* Team card with RGB border effect */
+    .team-card {
+      flex: 0 0 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      background: #111;
+    }
+
+    /* RGB glow effect */
+    .team-card::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: conic-gradient(
+        red,
+        orange,
+        yellow,
+        green,
+        blue,
+        indigo,
+        violet,
+        red
+      );
+      animation: spin 6s linear infinite;
+      z-index: 0;
+    }
+
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Black inner layer (so only border shows) */
+    .team-card::after {
+      content: "";
+      position: absolute;
+      inset: 6px;
+      background: var(--panel-bg);
+      border-radius: 14px;
+      z-index: 1;
+    }
+
+    /* Actual content */
+    .team-card-content {
+      position: relative;
+      z-index: 2;
+      color: var(--text);
+      text-align: center;
+      padding: 40px;
+      max-width: 600px;
+    }
+
+    .team-card-content h3 {
+      margin: 0 0 10px;
+      font-size: 2rem;
+    }
+
+    .team-card-content p {
+      font-size: 1.2rem;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <header>
+    <nav class="navbar">
+      <div class="logo">ENG Playground</div>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html" class="active">About</a></li>
+        <li><a href="courses.html">Courses</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="payment.html">Payment</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <h1>About <span>ENG Playground</span></h1>
+    <p>Your creative coding sandbox where ideas turn into reality.</p>
+  </section>
+
+  <!-- Mission -->
+  <section class="features">
+    <h2>Our Mission</h2>
+    <p style="max-width: 800px; margin: 0 auto; text-align: center;">
+      At <strong>ENG Playground</strong>, we aim to provide learners, developers, and creators 
+      with an intuitive coding environment that inspires experimentation. 
+      Whether you're a beginner writing your first line of code or a pro testing new concepts, 
+      our platform ensures a smooth and enjoyable experience.
+    </p>
+  </section>
+
+  <!-- Carousel Team Section -->
+  <section class="testimonials">
+    <h2>Meet the Team</h2>
+    <div class="carousel">
+      <div class="carousel-inner">
+        <div class="team-card">
+          <div class="team-card-content">
+            <h3>Alex</h3>
+            <p>“I wanted to make coding fun and accessible for everyone.”</p>
+          </div>
+        </div>
+        <div class="team-card">
+          <div class="team-card-content">
+            <h3>Sam</h3>
+            <p>“I designed ENG Playground with simplicity and creativity in mind.”</p>
+          </div>
+        </div>
+        <div class="team-card">
+          <div class="team-card-content">
+            <h3>Jordan</h3>
+            <p>“My focus was making the interpreter powerful yet lightweight.”</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Call to Action -->
+  <section class="cta">
+    <h2>Start Exploring Today</h2>
+    <p>Join thousands of learners and creators already building with ENG Playground.</p>
+    <a href="courses.html" class="btn primary">Browse Courses</a>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <div>&copy; 2025 ENG Playground. All rights reserved.</div>
+      <ul class="footer-links">
+        <li><a href="about.html">About</a></li>
+        <li><a href="courses.html">Courses</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="payment.html">Payment</a></li>
+      </ul>
+    </div>
+  </footer>
+</body>
+</html>
