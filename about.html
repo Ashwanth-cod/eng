@@ -11,18 +11,18 @@
       position: relative;
       width: 100%;
       overflow: hidden;
-      height: 400px;
+      height: 450px;
+      margin-top: 20px;
     }
 
     /* Inner wrapper that scrolls */
     .carousel-inner {
       display: flex;
-      width: 300%;
+      transition: transform 0.7s ease-in-out;
       height: 100%;
     }
 
-
-    /* Team card with RGB border effect */
+    /* Team card */
     .team-card {
       flex: 0 0 100%;
       height: 100%;
@@ -32,64 +32,50 @@
       position: relative;
       border-radius: 20px;
       overflow: hidden;
-      background: #111;
+      background: var(--panel-bg, #111);
+      border: 3px solid #fff;
     }
 
-    /* RGB glow effect */
-    .team-card::before {
-      content: "";
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: conic-gradient(
-        red,
-        orange,
-        yellow,
-        green,
-        blue,
-        indigo,
-        violet,
-        red
-      );
-      animation: spin 6s linear infinite;
-      z-index: 0;
-    }
-
-    @keyframes spin {
-      100% { transform: rotate(360deg); }
-    }
-
-    /* Black inner layer (so only border shows) */
-    .team-card::after {
-      content: "";
-      position: absolute;
-      inset: 6px;
-      background: var(--panel-bg);
-      border-radius: 14px;
-      z-index: 1;
-    }
-
-    /* Actual content */
+    /* Content */
     .team-card-content {
       position: relative;
-      z-index: 2;
-      color: var(--text);
+      color: var(--text, #fff);
       text-align: center;
       padding: 40px;
-      max-width: 600px;
+      max-width: 650px;
     }
 
     .team-card-content h3 {
-      margin: 0 0 10px;
+      margin: 0 0 15px;
       font-size: 2rem;
+      color: #fff;
     }
 
     .team-card-content p {
       font-size: 1.2rem;
-      line-height: 1.5;
+      line-height: 1.6;
+      color: #ddd;
     }
+
+    /* Controls */
+    .carousel-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: #fff;
+      font-size: 2rem;
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      z-index: 5;
+    }
+    .carousel-btn:hover {
+      background: rgba(255, 255, 255, 0.5);
+    }
+    .carousel-btn.prev { left: 15px; }
+    .carousel-btn.next { right: 15px; }
   </style>
 </head>
 <body>
@@ -128,26 +114,31 @@
   <section class="testimonials">
     <h2>Meet the Team</h2>
     <div class="carousel">
-      <div class="carousel-inner">
+      <div class="carousel-inner" id="carousel-inner">
         <div class="team-card">
           <div class="team-card-content">
-            <h3>Alex</h3>
-            <p>“I wanted to make coding fun and accessible for everyone.”</p>
+            <h3>Alex — Founder & Visionary</h3>
+            <p>“I wanted to make coding fun and accessible for everyone.  
+            With ENG Playground, my dream is to give every learner a space to play, test, and explore without limits.”</p>
           </div>
         </div>
         <div class="team-card">
           <div class="team-card-content">
-            <h3>Sam</h3>
-            <p>“I designed ENG Playground with simplicity and creativity in mind.”</p>
+            <h3>Sam — UI/UX Designer</h3>
+            <p>“Every detail matters. I designed ENG Playground with simplicity, creativity, and clarity in mind.  
+            My goal is for users to feel inspired and never overwhelmed.”</p>
           </div>
         </div>
         <div class="team-card">
           <div class="team-card-content">
-            <h3>Jordan</h3>
-            <p>“My focus was making the interpreter powerful yet lightweight.”</p>
+            <h3>Jordan — Lead Developer</h3>
+            <p>“Performance and flexibility were my top priorities.  
+            ENG Playground’s interpreter is powerful yet approachable, so developers can focus on building, not debugging.”</p>
           </div>
         </div>
       </div>
+      <button class="carousel-btn prev" id="prev">&#10094;</button>
+      <button class="carousel-btn next" id="next">&#10095;</button>
     </div>
   </section>
 
@@ -170,5 +161,33 @@
       </ul>
     </div>
   </footer>
+
+  <script>
+    const track = document.getElementById('carousel-inner');
+    const slides = document.querySelectorAll('.team-card');
+    const prevBtn = document.getElementById('prev');
+    const nextBtn = document.getElementById('next');
+    let index = 0;
+
+    function updateCarousel() {
+      track.style.transform = `translateX(-${index * 100}%)`;
+    }
+
+    nextBtn.addEventListener('click', () => {
+      index = (index + 1) % slides.length;
+      updateCarousel();
+    });
+
+    prevBtn.addEventListener('click', () => {
+      index = (index - 1 + slides.length) % slides.length;
+      updateCarousel();
+    });
+
+    // Auto-slide every 7s
+    setInterval(() => {
+      index = (index + 1) % slides.length;
+      updateCarousel();
+    }, 7000);
+  </script>
 </body>
 </html>

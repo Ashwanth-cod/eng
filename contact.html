@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact - ENG Playground</title>
+  <link rel="stylesheet" href="css/theme.css">
+  <style>
+    .contact {
+      padding: 60px 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .contact h2 {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+    }
+
+    .contact p {
+      text-align: center;
+      margin-bottom: 40px;
+      font-size: 1.1rem;
+      color: #ddd;
+    }
+
+    form {
+      background: var(--panel-bg, #111);
+      border: 2px solid #fff;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 20px;
+      border: none;
+      border-radius: 8px;
+      background: #222;
+      color: #fff;
+      font-size: 1rem;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    button {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      background: var(--primary, #007bff);
+      color: #fff;
+      font-weight: bold;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: var(--primary-dark, #0056b3);
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <header>
+    <nav class="navbar">
+      <div class="logo">ENG Playground</div>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="courses.html">Courses</a></li>
+        <li><a href="contact.html" class="active">Contact</a></li>
+        <li><a href="payment.html">Payment</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <h1>Contact <span>Us</span></h1>
+    <p>We’d love to hear from you! Choose the type of request and we’ll respond quickly.</p>
+  </section>
+
+  <!-- Contact Form -->
+  <section class="contact">
+    <h2>Get in Touch</h2>
+    <p>Whether it’s a simple hello, technical help, or a request for customized ENG courses — we’re here.</p>
+
+    <form name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+      <input type="hidden" name="form-name" value="contact">
+      <p style="display:none;">
+        <label>Don’t fill this out: <input name="bot-field"></label>
+      </p>
+
+      <label for="name">Name</label>
+      <input type="text" id="name" name="name" placeholder="Your full name" required>
+
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" placeholder="you@example.com" required>
+
+      <label for="reason">Reason for Contact</label>
+      <select id="reason" name="reason" required>
+        <option value="">-- Select an option --</option>
+        <option value="normal">Normal Contact</option>
+        <option value="help">Help & Support</option>
+        <option value="customized">Customized Courses</option>
+      </select>
+
+      <label for="message">Message</label>
+      <textarea id="message" name="message" placeholder="Write your message here..." required></textarea>
+
+      <button type="submit">Send Message</button>
+    </form>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <div>&copy; 2025 ENG Playground. All rights reserved.</div>
+      <ul class="footer-links">
+        <li><a href="about.html">About</a></li>
+        <li><a href="courses.html">Courses</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="payment.html">Payment</a></li>
+      </ul>
+    </div>
+  </footer>
+</body>
+</html>
