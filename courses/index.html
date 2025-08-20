@@ -4,24 +4,45 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Courses - ENG Playground</title>
-  <link rel="stylesheet" href="../../css/theme.css">
+  <link rel="stylesheet" href="../css/theme.css">
   <style>
-    .courses { padding: 60px 20px; text-align: center; }
-    .courses h2 { font-size: 2.5rem; margin-bottom: 20px; }
-    .sort-bar { margin-bottom: 40px; }
-    .sort-bar button {
-      padding: 10px 20px; margin: 0 8px; border: none;
-      border-radius: 8px; background: var(--primary, #007bff);
-      color: #fff; font-weight: bold; cursor: pointer; transition: background 0.3s;
+    .courses {
+      padding: 60px 20px;
+      text-align: center;
     }
-    .sort-bar button:hover, .sort-bar button.active {
+
+    .courses h2 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+    }
+
+    .sort-bar {
+      margin-bottom: 40px;
+    }
+
+    .sort-bar button {
+      padding: 10px 20px;
+      margin: 0 8px;
+      border: none;
+      border-radius: 8px;
+      background: var(--primary, #007bff);
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .sort-bar button:hover,
+    .sort-bar button.active {
       background: var(--primary-dark, #0056b3);
     }
+
     .course-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 25px;
     }
+
     .course-card {
       background: var(--panel-bg, #111);
       border: 2px solid #fff;
@@ -30,20 +51,44 @@
       text-align: left;
       transition: transform 0.3s, box-shadow 0.3s;
     }
+
     .course-card:hover {
       transform: translateY(-6px);
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
     }
-    .course-card h4 { margin-bottom: 10px; font-size: 1.4rem; color: #fff; }
-    .course-card p { font-size: 1rem; line-height: 1.5; color: #ddd; margin-bottom: 15px; }
+
+    .course-card h4 {
+      margin-bottom: 10px;
+      font-size: 1.4rem;
+      color: #fff;
+    }
+
+    .course-card p {
+      font-size: 1rem;
+      line-height: 1.5;
+      color: #ddd;
+      margin-bottom: 15px;
+    }
+
     .course-card a {
-      display: inline-block; padding: 8px 16px;
-      background: var(--primary, #007bff); color: #fff;
-      border-radius: 8px; text-decoration: none; font-weight: bold;
+      display: inline-block;
+      padding: 8px 16px;
+      background: var(--primary, #007bff);
+      color: #fff;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
       transition: background 0.3s;
     }
-    .course-card a:hover { background: var(--primary-dark, #0056b3); }
-    .cta { margin: 60px 0; text-align: center; }
+
+    .course-card a:hover {
+      background: var(--primary-dark, #0056b3);
+    }
+
+    .cta {
+      margin: 60px 0;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -52,9 +97,10 @@
     <nav class="navbar">
       <div class="logo">ENG Playground</div>
       <ul class="nav-links">
-        <li><a href="../index">Home</a></li>
+        <li><a href="../">Home</a></li>
         <li><a href="../about">About</a></li>
         <li><a href="../courses" class="active">Courses</a></li>
+        <li><a href="../playground">Playground</a></li>
         <li><a href="../contact">Contact</a></li>
         <li><a href="../payment">Payment</a></li>
       </ul>
@@ -71,15 +117,53 @@
   <section class="courses">
     <h2>Browse Courses</h2>
     <div class="sort-bar">
-      <button class="active" onclick="filterCourses('all', event)">All</button>
-      <button onclick="filterCourses('beginner', event)">Beginner Guide</button>
-      <button onclick="filterCourses('projects', event)">Beginner Projects</button>
-      <button onclick="filterCourses('intermediate', event)">Intermediate</button>
-      <button onclick="filterCourses('advanced', event)">Advanced</button>
+      <button class="active" onclick="filterCourses('all')">All</button>
+      <button onclick="filterCourses('beginner')">Beginner Guide</button>
+      <button onclick="filterCourses('projects')">Beginner Projects</button>
+      <button onclick="filterCourses('intermediate')">Intermediate</button>
+      <button onclick="filterCourses('advanced')">Advanced</button>
     </div>
 
-    <div class="course-grid" id="courseGrid">
-      <!-- Courses will be loaded here dynamically -->
+    <div class="course-grid">
+      <!-- Beginner Guide -->
+      <div class="course-card beginner">
+        <h4>Beginner Learning Guide</h4>
+        <p>Start ENG from scratch: syntax, variables, and first programs.</p>
+        <a href="payment.html">Enroll</a>
+      </div>
+
+      <!-- Beginner Projects -->
+      <div class="course-card projects">
+        <h4>Beginner Special Projects</h4>
+        <p>Build calculators, number games, and simple apps in ENG.</p>
+        <a href="payment.html">Enroll</a>
+      </div>
+
+      <!-- Intermediate -->
+      <div class="course-card intermediate">
+        <h4>Intermediate ENG Concepts</h4>
+        <p>Learn about loops, functions, and modular ENG programming.</p>
+        <a href="payment.html">Enroll</a>
+      </div>
+
+      <div class="course-card intermediate">
+        <h4>ENG Object-Oriented Basics</h4>
+        <p>Understand classes, methods, and encapsulation in ENG.</p>
+        <a href="payment.html">Enroll</a>
+      </div>
+
+      <!-- Advanced -->
+      <div class="course-card advanced">
+        <h4>Advanced ENG Interpreter</h4>
+        <p>Dive into parsing, execution flow, and ENG internals.</p>
+        <a href="payment.html">Enroll</a>
+      </div>
+
+      <div class="course-card advanced">
+        <h4>ENG Projects: Full Applications</h4>
+        <p>Work on advanced real-world ENG applications inside the Playground.</p>
+        <a href="payment.html">Enroll</a>
+      </div>
     </div>
   </section>
 
@@ -87,7 +171,7 @@
   <section class="cta">
     <h2>Pick Your Path</h2>
     <p>From guides to projects, ENG adapts to your learning style.</p>
-    <a href="../contact" class="btn primary">Get Started</a>
+    <a href="contact.html" class="btn primary">Get Started</a>
   </section>
 
   <!-- Footer -->
@@ -95,53 +179,31 @@
     <div class="footer-content">
       <div>&copy; 2025 ENG Playground. All rights reserved.</div>
       <ul class="footer-links">
-        <li><a href="../about">About</a></li>
-        <li><a href="../courses">Courses</a></li>
-        <li><a href="../contact">Contact</a></li>
-        <li><a href="../payment">Payment</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="courses.html">Courses</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="payment.html">Payment</a></li>
       </ul>
     </div>
   </footer>
 
   <script>
-    let coursesData = [];
+    function filterCourses(category) {
+      let cards = document.querySelectorAll(".course-card");
+      let buttons = document.querySelectorAll(".sort-bar button");
 
-    async function loadCourses() {
-      try {
-        const res = await fetch("../../data/courses.json");
-        coursesData = await res.json();
-        renderCourses("all");
-      } catch (err) {
-        console.error("Error loading courses:", err);
-      }
-    }
+      // remove active from all, then add to clicked
+      buttons.forEach(btn => btn.classList.remove("active"));
+      event.target.classList.add("active");
 
-    function renderCourses(category) {
-      const grid = document.getElementById("courseGrid");
-      grid.innerHTML = "";
-
-      coursesData.forEach(course => {
-        if (category === "all" || course.category === category) {
-          const card = document.createElement("div");
-          card.classList.add("course-card", course.category);
-          card.innerHTML = `
-            <h4>${course.name}</h4>
-            <p>${course.description}</p>
-            <a href="../payment/index.html?id=${course.id}">Enroll</a>
-          `;
-          grid.appendChild(card);
+      cards.forEach(card => {
+        if (category === "all" || card.classList.contains(category)) {
+          card.style.display = "block";
+        } else {
+          card.style.display = "none";
         }
       });
     }
-
-    function filterCourses(category, event) {
-      let buttons = document.querySelectorAll(".sort-bar button");
-      buttons.forEach(btn => btn.classList.remove("active"));
-      event.target.classList.add("active");
-      renderCourses(category);
-    }
-
-    loadCourses();
   </script>
 </body>
 </html>
