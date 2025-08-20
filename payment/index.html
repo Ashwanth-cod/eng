@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment - ENG Playground</title>
+  <link rel="stylesheet" href="../../css/theme.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+  <style>
+    body {
+      background: #0d0d0d;
+      color: #fff;
+      font-family: Arial, sans-serif;
+    }
+
+    .payment-container {
+      max-width: 900px;
+      margin: 60px auto;
+      padding: 40px;
+      background: var(--panel-bg, #1a1a1a);
+      border: 2px solid #333;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    }
+
+    .payment-container h2 {
+      font-size: 2.2rem;
+      margin-bottom: 25px;
+      text-align: center;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+    }
+
+    .card {
+      background: #111;
+      padding: 25px;
+      border-radius: 15px;
+      border: 1px solid #333;
+      box-shadow: inset 0 0 10px rgba(255,255,255,0.05);
+    }
+
+    .card h3 {
+      margin-bottom: 15px;
+      font-size: 1.3rem;
+      color: #0af;
+    }
+
+    .details p {
+      margin: 8px 0;
+      font-size: 1rem;
+    }
+
+    form input {
+      display: block;
+      width: 100%;
+      margin: 10px 0;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #555;
+      background: #1e1e1e;
+      color: #fff;
+    }
+
+    .qr-container {
+      text-align: center;
+      margin: 15px 0;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 14px 24px;
+      background: linear-gradient(135deg, #007bff, #00c6ff);
+      color: #fff;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 1rem;
+      transition: transform 0.2s, box-shadow 0.3s;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 198, 255, 0.4);
+    }
+
+    footer {
+      margin-top: 60px;
+      text-align: center;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <header>
+    <nav class="navbar">
+      <div class="logo">ENG Playground</div>
+      <ul class="nav-links">
+        <li><a href="../index">Home</a></li>
+        <li><a href="../about">About</a></li>
+        <li><a href="../courses">Courses</a></li>
+        <li><a href="../contact">Contact</a></li>
+        <li><a href="../payment" class="active">Payment</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Payment -->
+  <section class="payment-container">
+    <h2>Course Payment</h2>
+    <div class="grid">
+      
+      <!-- Left: Course & User Info -->
+      <div>
+        <div class="card">
+          <h3>Course Details</h3>
+          <div id="courseDetails" class="details"></div>
+        </div>
+
+        <div class="card" style="margin-top:20px;">
+          <h3>Your Information</h3>
+          <form id="userForm">
+            <input type="text" id="name" placeholder="Your Name" required>
+            <input type="email" id="email" placeholder="Email Address(Billing invoice will be sent to this E-Mail)" required>
+            <input type="tel" id="phone" placeholder="Phone Number" required>
+            <input type="number" id="age" placeholder="Age" required>
+          </form>
+        </div>
+      </div>
+
+      <!-- Right: Payment -->
+      <div class="card">
+        <h3>Pay with UPI</h3>
+        <div class="qr-container">
+          <canvas id="upiQR"></canvas>
+        </div>
+        <a id="gpayLink" class="btn">Pay with Google Pay</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div>&copy; 2025 ENG Playground. All rights reserved.</div>
+  </footer>
+
+  <script>
+    async function initPayment() {
+      const params = new URLSearchParams(window.location.search);
+      const courseId = params.get("id");
+
+      if (!courseId) {
+        document.getElementById("courseDetails").innerHTML = "<p>No course selected.</p>";
+        return;
+      }
+
+      const res = await fetch("../../data/courses.json");
+      const courses = await res.json();
+      const course = courses.find(c => c.id === courseId);
+
+      if (!course) {
+        document.getElementById("courseDetails").innerHTML = "<p>Invalid course ID.</p>";
+        return;
+      }
+
+      const gst = course.price * 0.18;
+      const total = course.price + gst;
+
+      document.getElementById("courseDetails").innerHTML = `
+        <p><strong>Course:</strong> ${course.name}</p>
+        <p><strong>Price:</strong> ₹${course.price.toFixed(2)}</p>
+        <p><strong>GST (18%):</strong> ₹${gst.toFixed(2)}</p>
+        <p><strong>Total:</strong> <span style="color:#0f0;">₹${total.toFixed(2)}</span></p>
+      `;
+
+      // Example UPI ID
+      const upiId = "example@upi";
+      const payeeName = "ENG Playground";
+      const transactionNote = course.name.replace(/ /g, "%20");
+
+      const upiLink = `upi://pay?pa=${upiId}&pn=${payeeName}&tn=${transactionNote}&am=${total.toFixed(2)}&cu=INR`;
+
+      // Google Pay deep link
+      document.getElementById("gpayLink").href = upiLink;
+
+      // Generate QR code
+      new QRious({
+        element: document.getElementById("upiQR"),
+        value: upiLink,
+        size: 220
+      });
+    }
+
+    initPayment();
+  </script>
+</body>
+</html>

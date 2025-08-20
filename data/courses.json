@@ -1,0 +1,44 @@
+[
+  {
+    "id": "beginner-guide",
+    "name": "Beginner Learning Guide",
+    "description": "Start ENG from scratch: syntax, variables, and first programs.",
+    "level": "beginner",
+    "price": 99
+  },
+  {
+    "id": "beginner-projects",
+    "name": "Beginner Special Projects",
+    "description": "Build calculators, number games, and simple apps in ENG.",
+    "level": "projects",
+    "price": 99
+  },
+  {
+    "id": "intermediate-concepts",
+    "name": "Intermediate ENG Concepts",
+    "description": "Learn about loops, functions, and modular ENG programming.",
+    "level": "intermediate",
+    "price": 199
+  },
+  {
+    "id": "oop-basics",
+    "name": "ENG Object-Oriented Basics",
+    "description": "Understand classes, methods, and encapsulation in ENG.",
+    "level": "intermediate",
+    "price": 299
+  },
+  {
+    "id": "advanced-interpreter",
+    "name": "Advanced ENG Interpreter",
+    "description": "Dive into parsing, execution flow, and ENG internals.",
+    "level": "advanced",
+    "price": 249
+  },
+  {
+    "id": "advanced-projects",
+    "name": "ENG Projects: Full Applications",
+    "description": "Work on advanced real-world ENG applications inside the Playground.",
+    "level": "advanced",
+    "price": 249
+  }
+]
