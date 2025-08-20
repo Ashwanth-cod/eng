@@ -99,31 +99,22 @@
     <h2>Get in Touch</h2>
     <p>Whether it’s a simple hello, technical help, or a request for customized ENG courses — we’re here.</p>
 
-    <form name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field">
-      <input type="hidden" name="form-name" value="contact">
-      <p style="display:none;">
-        <label>Don’t fill this out: <input name="bot-field"></label>
-      </p>
+    <form name="contact" method="POST" data-netlify="true" action="/contact">
+  <p>
+    <label>Your Name: <input type="text" name="name" required></label>
+  </p>
+  <p>
+    <label>Your Email: <input type="email" name="email" required></label>
+  </p>
+  <p>
+    <label>Message: <textarea name="message" required></textarea></label>
+  </p>
+  <p>
+    <button type="submit">Send</button>
+  </p>
+</form>
 
-      <label for="name">Name</label>
-      <input type="text" id="name" name="name" placeholder="Your full name" required>
 
-      <label for="email">Email</label>
-      <input type="email" id="email" name="email" placeholder="you@example.com" required>
-
-      <label for="reason">Reason for Contact</label>
-      <select id="reason" name="reason" required>
-        <option value="">-- Select an option --</option>
-        <option value="normal">Normal Contact</option>
-        <option value="help">Help & Support</option>
-        <option value="customized">Customized Courses</option>
-      </select>
-
-      <label for="message">Message</label>
-      <textarea id="message" name="message" placeholder="Write your message here..." required></textarea>
-
-      <button type="submit">Send Message</button>
-    </form>
   </section>
 
   <!-- Footer -->
