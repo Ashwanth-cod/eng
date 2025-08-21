@@ -5,16 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Payment - ENG Playground</title>
   <link rel="stylesheet" href="../../css/theme.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
   <style>
     body {
       background: #0d0d0d;
       color: #fff;
       font-family: Arial, sans-serif;
     }
-
     .payment-container {
-      max-width: 900px;
+      max-width: 1000px;
       margin: 60px auto;
       padding: 40px;
       background: var(--panel-bg, #1a1a1a);
@@ -22,19 +20,16 @@
       border-radius: 20px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.6);
     }
-
     .payment-container h2 {
       font-size: 2.2rem;
       margin-bottom: 25px;
       text-align: center;
     }
-
     .grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 25px;
     }
-
     .card {
       background: #111;
       padding: 25px;
@@ -42,18 +37,15 @@
       border: 1px solid #333;
       box-shadow: inset 0 0 10px rgba(255,255,255,0.05);
     }
-
     .card h3 {
       margin-bottom: 15px;
       font-size: 1.3rem;
       color: #0af;
     }
-
     .details p {
       margin: 8px 0;
       font-size: 1rem;
     }
-
     form input {
       display: block;
       width: 100%;
@@ -64,12 +56,10 @@
       background: #1e1e1e;
       color: #fff;
     }
-
     .qr-container {
       text-align: center;
       margin: 15px 0;
     }
-
     .btn {
       display: inline-block;
       padding: 14px 24px;
@@ -81,12 +71,10 @@
       font-size: 1rem;
       transition: transform 0.2s, box-shadow 0.3s;
     }
-
     .btn:hover {
       transform: translateY(-3px);
       box-shadow: 0 8px 20px rgba(0, 198, 255, 0.4);
     }
-
     footer {
       margin-top: 60px;
       text-align: center;
@@ -114,7 +102,6 @@
   <section class="payment-container">
     <h2>Course Payment</h2>
     <div class="grid">
-      
       <!-- Left: Course & User Info -->
       <div>
         <div class="card">
@@ -126,7 +113,7 @@
           <h3>Your Information</h3>
           <form id="userForm">
             <input type="text" id="name" placeholder="Your Name" required>
-            <input type="email" id="email" placeholder="Email Address(Billing invoice will be sent to this E-Mail)" required>
+            <input type="email" id="email" placeholder="Email Address" required>
             <input type="tel" id="phone" placeholder="Phone Number" required>
             <input type="number" id="age" placeholder="Age" required>
           </form>
@@ -135,11 +122,9 @@
 
       <!-- Right: Payment -->
       <div class="card">
-        <h3>Pay with UPI</h3>
-        <div class="qr-container">
-          <canvas id="upiQR"></canvas>
-        </div>
-        <a id="gpayLink" class="btn">Pay with Google Pay</a>
+        <h3>Pay with Google Pay</h3>
+        <div id="container" class="qr-container"></div>
+        <small style="color:#aaa;">Supports UPI, Debit & Credit Cards</small>
       </div>
     </div>
   </section>
@@ -149,7 +134,13 @@
     <div>&copy; 2025 ENG Playground. All rights reserved.</div>
   </footer>
 
+  <!-- Google Pay API -->
+  <script async src="https://pay.google.com/gp/p/js/pay.js" onload="onGooglePayLoaded()"></script>
+
   <script>
+    let paymentsClient;
+    let totalAmount = 0;
+
     async function initPayment() {
       const params = new URLSearchParams(window.location.search);
       const courseId = params.get("id");
@@ -169,31 +160,76 @@
       }
 
       const gst = course.price * 0.18;
-      const total = course.price + gst;
+      totalAmount = course.price + gst;
 
       document.getElementById("courseDetails").innerHTML = `
         <p><strong>Course:</strong> ${course.name}</p>
         <p><strong>Price:</strong> ₹${course.price.toFixed(2)}</p>
         <p><strong>GST (18%):</strong> ₹${gst.toFixed(2)}</p>
-        <p><strong>Total:</strong> <span style="color:#0f0;">₹${total.toFixed(2)}</span></p>
+        <p><strong>Total:</strong> <span style="color:#0f0;">₹${totalAmount.toFixed(2)}</span></p>
       `;
+    }
 
-      // Example UPI ID
-      const upiId = "example@upi";
-      const payeeName = "ENG Playground";
-      const transactionNote = course.name.replace(/ /g, "%20");
+    function getPaymentDataRequest() {
+      return {
+        apiVersion: 2,
+        apiVersionMinor: 0,
+        allowedPaymentMethods: [
+          {
+            type: "CARD",
+            parameters: {
+              allowedAuthMethods: ["PAN_ONLY", "CRYPTOGRAM_3DS"],
+              allowedCardNetworks: ["VISA", "MASTERCARD", "AMEX", "RUPAY"]
+            },
+            tokenizationSpecification: {
+              type: "PAYMENT_GATEWAY",
+              parameters: {
+                gateway: "razorpay",  // 🔑 replace with your payment processor
+                gatewayMerchantId: "merchant-id-here"
+              }
+            }
+          },
+          {
+            type: "UPI",
+            parameters: {
+              supportedMethods: ["UPI"]
+            }
+          }
+        ],
+        merchantInfo: {
+          merchantId: "01234567890123456789", // 🔑 replace with your GPay merchant ID
+          merchantName: "ENG Playground"
+        },
+        transactionInfo: {
+          totalPriceStatus: "FINAL",
+          totalPrice: totalAmount.toFixed(2),
+          currencyCode: "INR",
+          countryCode: "IN"
+        }
+      };
+    }
 
-      const upiLink = `upi://pay?pa=${upiId}&pn=${payeeName}&tn=${transactionNote}&am=${total.toFixed(2)}&cu=INR`;
-
-      // Google Pay deep link
-      document.getElementById("gpayLink").href = upiLink;
-
-      // Generate QR code
-      new QRious({
-        element: document.getElementById("upiQR"),
-        value: upiLink,
-        size: 220
+    function onGooglePayLoaded() {
+      paymentsClient = new google.payments.api.PaymentsClient({ environment: "TEST" }); // switch to PRODUCTION later
+      const button = paymentsClient.createButton({
+        onClick: onGooglePayButtonClicked,
+        buttonColor: "black",
+        buttonType: "long"
       });
+      document.getElementById("container").appendChild(button);
+    }
+
+    function onGooglePayButtonClicked() {
+      const request = getPaymentDataRequest();
+      paymentsClient.loadPaymentData(request)
+        .then(paymentData => {
+          console.log("Payment Success:", paymentData);
+          alert("Payment successful! 🎉");
+          // 🔑 Send paymentData to backend for processing & capture
+        })
+        .catch(err => {
+          console.error("Payment Failed:", err);
+        });
     }
 
     initPayment();

@@ -124,46 +124,8 @@
       <button onclick="filterCourses('advanced')">Advanced</button>
     </div>
 
-    <div class="course-grid">
-      <!-- Beginner Guide -->
-      <div class="course-card beginner">
-        <h4>Beginner Learning Guide</h4>
-        <p>Start ENG from scratch: syntax, variables, and first programs.</p>
-        <a href="payment.html">Enroll</a>
-      </div>
-
-      <!-- Beginner Projects -->
-      <div class="course-card projects">
-        <h4>Beginner Special Projects</h4>
-        <p>Build calculators, number games, and simple apps in ENG.</p>
-        <a href="payment.html">Enroll</a>
-      </div>
-
-      <!-- Intermediate -->
-      <div class="course-card intermediate">
-        <h4>Intermediate ENG Concepts</h4>
-        <p>Learn about loops, functions, and modular ENG programming.</p>
-        <a href="payment.html">Enroll</a>
-      </div>
-
-      <div class="course-card intermediate">
-        <h4>ENG Object-Oriented Basics</h4>
-        <p>Understand classes, methods, and encapsulation in ENG.</p>
-        <a href="payment.html">Enroll</a>
-      </div>
-
-      <!-- Advanced -->
-      <div class="course-card advanced">
-        <h4>Advanced ENG Interpreter</h4>
-        <p>Dive into parsing, execution flow, and ENG internals.</p>
-        <a href="payment.html">Enroll</a>
-      </div>
-
-      <div class="course-card advanced">
-        <h4>ENG Projects: Full Applications</h4>
-        <p>Work on advanced real-world ENG applications inside the Playground.</p>
-        <a href="payment.html">Enroll</a>
-      </div>
+    <div class="course-grid" id="courseGrid">
+      <!-- Courses will load here -->
     </div>
   </section>
 
@@ -188,21 +150,42 @@
   </footer>
 
   <script>
-    function filterCourses(category) {
-      let cards = document.querySelectorAll(".course-card");
-      let buttons = document.querySelectorAll(".sort-bar button");
+    let allCourses = [];
 
-      // remove active from all, then add to clicked
+    // Load courses.json
+    fetch("../data/courses.json")
+      .then(response => response.json())
+      .then(data => {
+        allCourses = data;
+        displayCourses(allCourses);
+      })
+      .catch(err => console.error("Error loading courses.json:", err));
+
+    function displayCourses(courses) {
+      const grid = document.getElementById("courseGrid");
+      grid.innerHTML = "";
+      courses.forEach(course => {
+        let card = document.createElement("div");
+        card.className = `course-card ${course.category}`;
+        card.innerHTML = `
+          <h4>${course.name}</h4>
+          <p>${course.description}</p>
+          <a href="../payment/?id=${course.id}">Enroll</a>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function filterCourses(category) {
+      let buttons = document.querySelectorAll(".sort-bar button");
       buttons.forEach(btn => btn.classList.remove("active"));
       event.target.classList.add("active");
 
-      cards.forEach(card => {
-        if (category === "all" || card.classList.contains(category)) {
-          card.style.display = "block";
-        } else {
-          card.style.display = "none";
-        }
-      });
+      if (category === "all") {
+        displayCourses(allCourses);
+      } else {
+        displayCourses(allCourses.filter(c => c.category === category));
+      }
     }
   </script>
 </body>
